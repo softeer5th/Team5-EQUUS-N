@@ -79,7 +79,7 @@ public class TeamController {
         return ResponseEntity.ok(teamDetailResponse);
     }
 
-    @Operation(summary = "팀원 조횐", description = "특정 팀에 존재하는 모든 사용자의 정보를 조회한다.")
+    @Operation(summary = "팀원 조회", description = "특정 팀에 존재하는 모든 사용자의 정보를 조회한다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공."),
             @ApiResponse(responseCode = "404", description = "해당 팀에 대한 조회 권한이 없을 경우 - 정보 숨김", content = @Content)
@@ -111,7 +111,7 @@ public class TeamController {
             @ApiResponse(responseCode = "400", description = "요청한 입력값이 잘못되어있을 경우", content = @Content)
     })
     @PostMapping("/{teamId}")
-    public ResponseEntity<TeamResponse> updateTeamInfo(@Login Long memberId, @PathVariable Long teamId, @Valid @RequestBody TeamUpdateRequest request){
+    public ResponseEntity<TeamResponse> updateTeamInfo(@Login Long memberId, @PathVariable Long teamId, @Valid @RequestBody TeamUpdateRequest request) {
         Team team = teamService.updateTeamInfo(memberId, teamId, new TeamUpdateDto(request));
         TeamResponse teamResponse = new TeamResponse(team);
         return ResponseEntity.ok(teamResponse);

@@ -17,11 +17,11 @@ public class FrequentFeedbackRequestQueryRepository {
 
     public List<FrequentFeedbackRequest> getFrequentFeedbackRequests(Long receiverId, Long teamId) {
         return queryFactory.selectFrom(frequentFeedbackRequest)
-                .join(frequentFeedbackRequest.requester).fetchJoin()
-                .join(frequentFeedbackRequest.teamMember).fetchJoin()
-                .join(frequentFeedbackRequest.teamMember.team).fetchJoin()
-                .where(frequentFeedbackRequest.teamMember.member.id.eq(receiverId)
-                        .and(frequentFeedbackRequest.teamMember.team.id.eq(teamId)))
+                .join(frequentFeedbackRequest.sender).fetchJoin()
+                .join(frequentFeedbackRequest.receiver).fetchJoin()
+                .join(frequentFeedbackRequest.team).fetchJoin()
+                .where(frequentFeedbackRequest.receiver.id.eq(receiverId)
+                        .and(frequentFeedbackRequest.team.id.eq(teamId)))
                 .fetch();
     }
 }

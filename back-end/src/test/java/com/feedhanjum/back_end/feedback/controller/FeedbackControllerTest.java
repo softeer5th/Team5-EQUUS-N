@@ -24,9 +24,7 @@ import com.feedhanjum.back_end.schedule.domain.ScheduleMember;
 import com.feedhanjum.back_end.schedule.repository.RegularFeedbackRequestRepository;
 import com.feedhanjum.back_end.schedule.repository.ScheduleMemberRepository;
 import com.feedhanjum.back_end.schedule.repository.ScheduleRepository;
-import com.feedhanjum.back_end.team.domain.FrequentFeedbackRequest;
 import com.feedhanjum.back_end.team.domain.Team;
-import com.feedhanjum.back_end.team.domain.TeamMember;
 import com.feedhanjum.back_end.team.repository.FrequentFeedbackRequestRepository;
 import com.feedhanjum.back_end.team.repository.TeamMemberRepository;
 import com.feedhanjum.back_end.team.repository.TeamRepository;
@@ -127,12 +125,6 @@ class FeedbackControllerTest {
     private Member member3;
     private Team team1;
     private Team team2;
-    private TeamMember teamMember11;
-    private TeamMember teamMember12;
-    private TeamMember teamMember13;
-    private TeamMember teamMember21;
-    private TeamMember teamMember22;
-    private TeamMember teamMember23;
     private Schedule schedule1;
     private ScheduleMember scheduleMember1;
     private ScheduleMember scheduleMember2;
@@ -146,16 +138,12 @@ class FeedbackControllerTest {
         memberRepository.saveAll(List.of(member1, member2, member3));
 
         team1 = createTeam("team1", member1);
+        team1.join(member2);
+        team1.join(member3);
         team2 = createTeam("team2", member2);
+        team2.join(member1);
+        team2.join(member3);
         teamRepository.saveAll(List.of(team1, team2));
-
-        teamMember11 = new TeamMember(team1, member1);
-        teamMember12 = new TeamMember(team1, member2);
-        teamMember13 = new TeamMember(team1, member3);
-        teamMember21 = new TeamMember(team2, member1);
-        teamMember22 = new TeamMember(team2, member2);
-        teamMember23 = new TeamMember(team2, member3);
-        teamMemberRepository.saveAll(List.of(teamMember11, teamMember12, teamMember13, teamMember21, teamMember22, teamMember23));
 
         schedule1 = createSchedule("schedule1", team1, member1, false);
         scheduleRepository.save(schedule1);
@@ -378,9 +366,9 @@ class FeedbackControllerTest {
 
             assertThat(requests).hasSize(1);
             var request = requests.get(0);
-            assertThat(request.getRequester()).isEqualTo(sender);
-            assertThat(request.getTeamMember().getMember()).isEqualTo(receiver);
-            assertThat(request.getTeamMember().getTeam()).isEqualTo(team);
+            assertThat(request.getSender()).isEqualTo(sender);
+            assertThat(request.getReceiver()).isEqualTo(receiver);
+            assertThat(request.getTeam()).isEqualTo(team);
             assertThat(request.getRequestedContent()).isEqualTo(requestedContent);
             assertThat(request.getCreatedAt()).isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.SECONDS));
         }
@@ -397,25 +385,27 @@ class FeedbackControllerTest {
             // given
             Member sender1 = member1;
             Member sender2 = member3;
-            TeamMember teamMember = teamMember12;
-            Member receiver = teamMember.getMember();
-            frequentFeedbackRequestRepository.save(new FrequentFeedbackRequest("내용1", teamMember, sender1));
-            frequentFeedbackRequestRepository.save(new FrequentFeedbackRequest("내용2", teamMember, sender2));
+            Team team = team1;
+            Member receiver = member2;
+            team.requestFeedback(sender1, receiver, "내용 1");
+            team.requestFeedback(sender2, receiver, "내용 2");
+            teamRepository.save(team);
+
 
             // when
             assertThat(mvc.get()
                     .uri("/api/feedbacks/frequent/request")
-                    .queryParam("teamId", teamMember.getTeam().getId().toString())
+                    .queryParam("teamId", team.getId().toString())
                     .session(withLoginUser(receiver))
                     .contentType(MediaType.APPLICATION_JSON)
             ).hasStatus(HttpStatus.OK)
                     .body()
                     .satisfies(result -> {
-                        List<FrequentFeedbackRequestForApiResponse> requests = mapper.readValue(result, new TypeReference<List<FrequentFeedbackRequestForApiResponse>>() {
+                        List<FrequentFeedbackRequestForApiResponse> requests = mapper.readValue(result, new TypeReference<>() {
                         });
                         assertThat(requests).hasSize(2);
                         assertThat(requests).extracting(FrequentFeedbackRequestForApiResponse::requestedContent)
-                                .containsExactlyInAnyOrder("내용1", "내용2");
+                                .containsExactlyInAnyOrder("내용 1", "내용 2");
                         assertThat(requests).extracting(req -> req.requester().email())
                                 .containsExactlyInAnyOrder(sender1.getEmail(), sender2.getEmail());
                     });

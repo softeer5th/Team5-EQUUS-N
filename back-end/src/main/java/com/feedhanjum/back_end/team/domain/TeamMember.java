@@ -6,9 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -27,12 +24,9 @@ public class TeamMember {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToMany(mappedBy = "teamMember")
-    private final List<FrequentFeedbackRequest> frequentFeedbackRequests = new ArrayList<>();
-
     public TeamMember(Team team, Member member) {
         this.team = team;
         this.member = member;
     }
-    
+
 }
