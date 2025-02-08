@@ -3,11 +3,9 @@ package com.feedhanjum.back_end.team.controller;
 import com.feedhanjum.back_end.auth.infra.Login;
 import com.feedhanjum.back_end.member.controller.dto.MemberDto;
 import com.feedhanjum.back_end.member.service.MemberService;
-import com.feedhanjum.back_end.team.controller.dto.TeamCreateRequest;
-import com.feedhanjum.back_end.team.controller.dto.TeamDetailResponse;
-import com.feedhanjum.back_end.team.controller.dto.TeamResponse;
-import com.feedhanjum.back_end.team.controller.dto.TeamUpdateRequest;
+import com.feedhanjum.back_end.team.controller.dto.*;
 import com.feedhanjum.back_end.team.domain.Team;
+import com.feedhanjum.back_end.team.domain.TeamJoinToken;
 import com.feedhanjum.back_end.team.service.TeamService;
 import com.feedhanjum.back_end.team.service.dto.TeamCreateDto;
 import com.feedhanjum.back_end.team.service.dto.TeamUpdateDto;
@@ -79,7 +77,7 @@ public class TeamController {
         return ResponseEntity.ok(teamDetailResponse);
     }
 
-    @Operation(summary = "팀원 조횐", description = "특정 팀에 존재하는 모든 사용자의 정보를 조회한다.")
+    @Operation(summary = "팀원 조회", description = "특정 팀에 존재하는 모든 사용자의 정보를 조회한다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공."),
             @ApiResponse(responseCode = "404", description = "해당 팀에 대한 조회 권한이 없을 경우 - 정보 숨김", content = @Content)
@@ -111,7 +109,7 @@ public class TeamController {
             @ApiResponse(responseCode = "400", description = "요청한 입력값이 잘못되어있을 경우", content = @Content)
     })
     @PostMapping("/{teamId}")
-    public ResponseEntity<TeamResponse> updateTeamInfo(@Login Long memberId, @PathVariable Long teamId, @Valid @RequestBody TeamUpdateRequest request){
+    public ResponseEntity<TeamResponse> updateTeamInfo(@Login Long memberId, @PathVariable Long teamId, @Valid @RequestBody TeamUpdateRequest request) {
         Team team = teamService.updateTeamInfo(memberId, teamId, new TeamUpdateDto(request));
         TeamResponse teamResponse = new TeamResponse(team);
         return ResponseEntity.ok(teamResponse);
@@ -141,5 +139,16 @@ public class TeamController {
     public ResponseEntity<Void> leaveTeam(@Login Long memberId, @PathVariable Long teamId) {
         teamService.leaveTeam(memberId, teamId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "팀 가입 토큰 발급", description = "특정 팀에 가입할 수 있는 토큰을 발급한다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "토큰 발급에 성공한 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 팀 또는 팀원을 찾을 수 없는 경우", content = @Content),
+    })
+    @PostMapping("/{teamId}/join-token")
+    public ResponseEntity<TeamJoinTokenResponse> getJoinToken(@Login Long memberId, @PathVariable Long teamId) {
+        TeamJoinToken joinToken = teamService.createJoinToken(memberId, teamId);
+        return ResponseEntity.ok(TeamJoinTokenResponse.from(joinToken));
     }
 }

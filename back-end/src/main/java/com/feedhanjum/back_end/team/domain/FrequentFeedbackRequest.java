@@ -23,29 +23,24 @@ public class FrequentFeedbackRequest {
 
     private String requestedContent;
 
-    @ManyToOne
-    @JoinColumn(name = "requester_id")
-    private Member requester;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_member_id")
-    private TeamMember teamMember;
+    @JoinColumn(name = "team_id")
+    private Team team;
 
-    public FrequentFeedbackRequest(String requestedContent, TeamMember teamMember, Member requester) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id")
+    private Member receiver;
+
+    FrequentFeedbackRequest(String requestedContent, Member sender, Team team, Member receiver) {
         this.requestedContent = requestedContent;
-        this.requester = requester;
+        this.sender = sender;
+        this.team = team;
+        this.receiver = receiver;
         this.createdAt = LocalDateTime.now();
-        setTeamMember(teamMember);
-    }
-
-    private void setTeamMember(TeamMember teamMember) {
-        if (this.teamMember != null) {
-            this.teamMember.getFrequentFeedbackRequests().remove(this);
-        }
-        this.teamMember = teamMember;
-        if (teamMember != null && !teamMember.getFrequentFeedbackRequests().contains(this)) {
-            teamMember.getFrequentFeedbackRequests().add(this);
-        }
     }
 
 }

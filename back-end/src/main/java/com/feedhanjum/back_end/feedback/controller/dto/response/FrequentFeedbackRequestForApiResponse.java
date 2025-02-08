@@ -12,8 +12,8 @@ public record FrequentFeedbackRequestForApiResponse(
         LocalDateTime createdAt
 ) {
     public static FrequentFeedbackRequestForApiResponse from(FrequentFeedbackRequest request) {
-        return new FrequentFeedbackRequestForApiResponse(new MemberDto(request.getRequester()),
-                request.getTeamMember().getTeam().getId(), request.getRequestedContent(), request.getCreatedAt());
+        return new FrequentFeedbackRequestForApiResponse(new MemberDto(request.getSender()),
+                request.getTeam().getId(), request.getRequestedContent(), request.getCreatedAt());
     }
 }
 

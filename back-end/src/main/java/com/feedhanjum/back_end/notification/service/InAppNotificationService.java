@@ -19,10 +19,9 @@ import com.feedhanjum.back_end.schedule.domain.Schedule;
 import com.feedhanjum.back_end.schedule.event.RegularFeedbackRequestCreatedEvent;
 import com.feedhanjum.back_end.schedule.event.ScheduleCreatedEvent;
 import com.feedhanjum.back_end.schedule.repository.ScheduleRepository;
-import com.feedhanjum.back_end.team.domain.FrequentFeedbackRequest;
 import com.feedhanjum.back_end.team.domain.Team;
 import com.feedhanjum.back_end.team.domain.TeamMember;
-import com.feedhanjum.back_end.team.event.FrequentFeedbackRequestCreatedEvent;
+import com.feedhanjum.back_end.team.event.FrequentFeedbackRequestedEvent;
 import com.feedhanjum.back_end.team.event.TeamLeaderChangedEvent;
 import com.feedhanjum.back_end.team.repository.FrequentFeedbackRequestRepository;
 import com.feedhanjum.back_end.team.repository.TeamMemberRepository;
@@ -67,13 +66,14 @@ public class InAppNotificationService {
     }
 
     @Transactional
-    public void createNotification(FrequentFeedbackRequestCreatedEvent event) {
-        Long feedbackRequestId = event.frequentFeedbackRequestId();
+    public void createNotification(FrequentFeedbackRequestedEvent event) {
+        Long senderId = event.senderId();
+        Long receiverId = event.receiverId();
+        Long teamId = event.teamId();
 
-        FrequentFeedbackRequest request = frequentFeedbackRequestRepository.findById(feedbackRequestId)
-                .orElseThrow(EntityNotFoundException::new);
+        Member sender = memberRepository.findById(senderId).orElseThrow();
 
-        InAppNotification notification = new FrequentFeedbackRequestNotification(request);
+        InAppNotification notification = new FrequentFeedbackRequestNotification(receiverId, sender.getName(), teamId);
         inAppNotificationRepository.save(notification);
         eventPublisher.publishEvent(new InAppNotificationCreatedEvent(notification.getId()));
     }
@@ -166,7 +166,7 @@ public class InAppNotificationService {
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(EntityNotFoundException::new);
 
-        List<TeamMember> teamMembers = teamMemberRepository.findByTeam(schedule.getTeam());
+        List<TeamMember> teamMembers = schedule.getTeam().getTeamMembers();
         for (TeamMember teamMember : teamMembers) {
             Member receiver = teamMember.getMember();
             InAppNotification notification = new ScheduleCreateNotification(receiver, schedule);

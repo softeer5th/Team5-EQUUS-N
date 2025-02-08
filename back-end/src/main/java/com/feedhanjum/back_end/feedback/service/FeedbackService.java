@@ -19,10 +19,8 @@ import com.feedhanjum.back_end.schedule.event.RegularFeedbackRequestCreatedEvent
 import com.feedhanjum.back_end.schedule.repository.RegularFeedbackRequestRepository;
 import com.feedhanjum.back_end.schedule.repository.ScheduleMemberRepository;
 import com.feedhanjum.back_end.schedule.repository.ScheduleRepository;
-import com.feedhanjum.back_end.team.domain.FrequentFeedbackRequest;
 import com.feedhanjum.back_end.team.domain.Team;
-import com.feedhanjum.back_end.team.domain.TeamMember;
-import com.feedhanjum.back_end.team.event.FrequentFeedbackRequestCreatedEvent;
+import com.feedhanjum.back_end.team.event.FrequentFeedbackRequestedEvent;
 import com.feedhanjum.back_end.team.exception.TeamMembershipNotFoundException;
 import com.feedhanjum.back_end.team.repository.FrequentFeedbackRequestRepository;
 import com.feedhanjum.back_end.team.repository.TeamMemberRepository;
@@ -35,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -79,19 +76,14 @@ public class FeedbackService {
      * @throws EntityNotFoundException sender id, receiver id, team id에 해당하는 엔티티가 없을 경우, receiver나 sender가 team에 속해있지 않을 경우
      */
     @Transactional
-    public FrequentFeedbackRequest requestFrequentFeedback(Long senderId, Long teamId, Long receiverId, String requestedContent) {
+    public void requestFrequentFeedback(Long senderId, Long teamId, Long receiverId, String requestedContent) {
         Member sender = memberRepository.findById(senderId).orElseThrow(() -> new EntityNotFoundException("sender id에 해당하는 member가 없습니다."));
-        memberRepository.findById(receiverId).orElseThrow(() -> new EntityNotFoundException("receiver id에 해당하는 member가 없습니다."));
-        teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("team name에 해당하는 team이 없습니다."));
+        Member receiver = memberRepository.findById(receiverId).orElseThrow(() -> new EntityNotFoundException("receiver id에 해당하는 member가 없습니다."));
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("team name에 해당하는 team이 없습니다."));
 
-        teamMemberRepository.findByMemberIdAndTeamId(senderId, teamId).orElseThrow(() -> new EntityNotFoundException("sender 가 team 에 속해있지 않습니다"));
-        TeamMember teamMember = teamMemberRepository.findByMemberIdAndTeamId(receiverId, teamId).orElseThrow(() -> new EntityNotFoundException("receiver 가 team 에 속해있지 않습니다"));
+        team.requestFeedback(sender, receiver, requestedContent);
 
-        FrequentFeedbackRequest frequentFeedbackRequest = new FrequentFeedbackRequest(requestedContent, teamMember, sender);
-
-        frequentFeedbackRequestRepository.save(frequentFeedbackRequest);
-        eventPublisher.publishEvent(new FrequentFeedbackRequestCreatedEvent(frequentFeedbackRequest.getId()));
-        return frequentFeedbackRequest;
+        eventPublisher.publishEvent(new FrequentFeedbackRequestedEvent(senderId, teamId, receiverId));
     }
 
     /**
@@ -165,8 +157,6 @@ public class FeedbackService {
     @Transactional
     public void createRegularFeedbackRequests(Long scheduleId) {
         Schedule schedule = scheduleRepository.findByIdWithMembers(scheduleId).orElseThrow(() -> new EntityNotFoundException("schedule id에 해당하는 schedule이 없습니다."));
-        if (!schedule.isEnd())
-            throw new IllegalStateException("schedule이 아직 끝나지 않았습니다.");
 
         List<RegularFeedbackRequest> requests = new ArrayList<>();
         LocalDateTime requestTime = schedule.getEndTime();
@@ -202,10 +192,10 @@ public class FeedbackService {
      */
     @Transactional
     public void rejectAllFrequentFeedbackRequests(Long receiverId, Long teamId) {
-        TeamMember teamMember = teamMemberRepository.findByMemberIdAndTeamId(receiverId, teamId)
-                .orElseThrow(() -> new EntityNotFoundException("receiver 가 team 에 속해있지 않습니다"));
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("팀이 존재하지 않습니다"));
+        Member receiver = memberRepository.findById(receiverId).orElseThrow(() -> new EntityNotFoundException("멤버가 존재하지 않습니다"));
 
-        frequentFeedbackRequestRepository.deleteAllByTeamMember(teamMember);
+        team.rejectFeedbackRequests(receiver);
     }
 
     /**
@@ -220,16 +210,11 @@ public class FeedbackService {
         Feedback feedback = feedbackRepository
                 .findById(feedbackId).orElseThrow(() -> new EntityNotFoundException("feedback id에 해당하는 feedback이 없습니다."));
 
-        Member requester = feedback.getReceiver();
-        TeamMember teamMember = teamMemberRepository.findByMemberIdAndTeamId(feedback.getSender().getId(), feedback.getTeam().getId())
-                .orElseThrow(() -> new TeamMembershipNotFoundException("sender 가 team 에 속해있지 않습니다"));
+        Member receiver = feedback.getReceiver();
+        Member sender = feedback.getSender();
+        Team team = feedback.getTeam();
 
-        Optional<FrequentFeedbackRequest> request = frequentFeedbackRequestRepository.findByTeamMemberAndRequester(teamMember, requester);
-        if (request.isEmpty()) {
-            // 수시 피드백 요청이 없던 경우
-            return;
-        }
+        team.removeFeedbackRequest(sender, receiver);
 
-        frequentFeedbackRequestRepository.delete(request.get());
     }
 }

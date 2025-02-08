@@ -1,6 +1,5 @@
 package com.feedhanjum.back_end.notification.domain;
 
-import com.feedhanjum.back_end.team.domain.FrequentFeedbackRequest;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
@@ -15,9 +14,9 @@ public class FrequentFeedbackRequestNotification extends InAppNotification {
     private String senderName;
     private Long teamId;
 
-    public FrequentFeedbackRequestNotification(FrequentFeedbackRequest request) {
-        super(request.getTeamMember().getMember().getId());
-        this.senderName = request.getRequester().getName();
-        this.teamId = request.getTeamMember().getTeam().getId();
+    public FrequentFeedbackRequestNotification(Long receiverId, String senderName, Long teamId) {
+        super(receiverId);
+        this.senderName = senderName;
+        this.teamId = teamId;
     }
 }
