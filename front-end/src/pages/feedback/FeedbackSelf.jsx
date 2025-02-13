@@ -8,6 +8,8 @@ import { showToast } from '../../utility/handleToast';
 import { useFeedbackSelf } from '../../api/useFeedback2';
 import { useNavigate } from 'react-router-dom';
 import CustomInput from '../../components/CustomInput';
+import { useUser } from '../../useUser';
+import { useTeam } from '../../useTeam';
 
 export default function FeedbackSelf() {
   const [titleContent, setTitleContent] = useState('');
@@ -16,6 +18,8 @@ export default function FeedbackSelf() {
 
   const navigate = useNavigate();
 
+  const { userId } = useUser();
+  const { selectedTeam } = useTeam();
   const mutation = useFeedbackSelf();
 
   return (
@@ -46,15 +50,17 @@ export default function FeedbackSelf() {
         <LargeButton
           isOutlined={false}
           text={mutation.isPending ? '로딩중' : '완료'} // 로딩 중일 때 버튼 텍스트 변경... 추후 수정 필요
-          disabled={textLength === 0 ? true : false}
+          disabled={
+            textLength === 0 || titleContent.length === 0 ? true : false
+          }
           onClick={() => {
             if (textLength === 0) showToast('내용을 입력해주세요');
             else if (textLength > 400) showToast('400자 이하로 작성해주세요');
             else
               mutation.mutate(
                 {
-                  writerId: 1, // 나중에 전역 상태에서 가져오기
-                  teamId: 1, // 나중에 전역 상태에서 가져오기
+                  writerId: userId,
+                  teamId: selectedTeam,
                   title: titleContent,
                   content: textContent,
                 },

@@ -70,3 +70,13 @@ export const useRegularFeedbackSend = () => {
       }),
   });
 };
+
+export const useFrequnetFeedbackSend = () => {
+  return useMutation({
+    mutationFn: (data) =>
+      api.post({
+        url: '/api/feedbacks/frequent',
+        body: data,
+      }),
+  });
+};

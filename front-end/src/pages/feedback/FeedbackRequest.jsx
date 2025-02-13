@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { showToast } from '../../utility/handleToast';
 import { useFeedbackRequest } from '../../api/useFeedback2';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTeam } from '../../useTeam';
 
 export default function FeedbackRequest() {
   const [textLength, setTextLength] = useState(0);
@@ -20,6 +21,7 @@ export default function FeedbackRequest() {
   const receiverName = queryParams.get('receiverName');
 
   const mutation = useFeedbackRequest();
+  const { selectedTeam } = useTeam();
 
   return (
     <div className='flex size-full flex-col'>
@@ -55,7 +57,7 @@ export default function FeedbackRequest() {
               mutation.mutate(
                 {
                   receiverId: receiverId,
-                  teamId: 1, // 나중에 전역 상태에서 가져오기
+                  teamId: selectedTeam,
                   requestedContent: textContent.trim(),
                 },
                 {

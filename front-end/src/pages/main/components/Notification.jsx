@@ -94,8 +94,8 @@ export default function Notification({
         className='absolute top-4 right-4'
         onClick={() =>
           notification.type === notiType.REQUEST ?
-            onClose({ notificationId: feedbackRequestNotiIds })
-          : onClose({ notificationId: [notification.notificationId] })
+            onClose({ notificationIds: feedbackRequestNotiIds })
+          : onClose({ notificationIds: [notification.notificationId] })
         }
       >
         <Icon name='delete' color='var(--color-gray-500)' />

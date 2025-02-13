@@ -10,11 +10,11 @@ export default function FeedBackButton({ currentFeedback, onClick }) {
     <div className='flex gap-3'>
       <div
         className={`rounded-400 flex cursor-pointer flex-col items-center justify-center gap-7 bg-gray-800 px-6.5 py-9 outline-lime-500 select-none ${
-          currentFeedback === 'good' ? 'outline-2' : ''
+          currentFeedback === '칭찬해요' ? 'outline-2' : ''
         }`}
         style={{ width: '170px' }}
         onClick={() => {
-          onClick('good');
+          onClick('칭찬해요');
         }}
       >
         <p className='text-4xl'>😀</p>
@@ -29,11 +29,11 @@ export default function FeedBackButton({ currentFeedback, onClick }) {
       </div>
       <div
         className={`rounded-400 flex cursor-pointer flex-col items-center justify-center gap-7 bg-gray-800 px-6.5 py-9 outline-lime-500 select-none ${
-          currentFeedback === 'bad' ? 'outline-2' : ''
+          currentFeedback === '아쉬워요' ? 'outline-2' : ''
         }`}
         style={{ width: '170px' }}
         onClick={() => {
-          onClick('bad');
+          onClick('아쉬워요');
         }}
       >
         <p className='text-4xl'>🤔</p>

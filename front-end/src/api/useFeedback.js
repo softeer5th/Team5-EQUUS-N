@@ -99,14 +99,15 @@ export const useEditFavorite = () => {
 export const useFeedbackFavoriteByUser = () => {
   return useQuery({
     queryKey: ['feedback-favorite-by-user'],
-    queryFn: () => api.get({ url: '/api/member/feedback-prefer' }),
+    queryFn: (data) =>
+      api.get({ url: `/api/member/feedback-prefer?findMemberId=${data}` }),
   });
 };
 
-export const useFeedbackKeyword = () => {
+export const useFeedbackObjective = () => {
   return useQuery({
-    queryKey: ['feedback-keyword'],
-    queryFn: () => api.get({ url: '/api/feedback/keyword' }),
+    queryKey: ['feedback-objective'],
+    queryFn: () => api.get({ url: '/api/feedback/objective' }),
   });
 };
 

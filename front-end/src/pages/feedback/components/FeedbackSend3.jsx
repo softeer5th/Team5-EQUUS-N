@@ -11,16 +11,24 @@ import AiButton from '../../../components/buttons/AiButton';
 import FooterWrapper from '../../../components/wrappers/FooterWrapper';
 import LargeButton from '../../../components/buttons/LargeButton';
 import { transformToBytes } from '../../../utility/inputChecker';
-import { useRegularFeedbackSend } from '../../../api/useFeedback2';
+import {
+  useFrequnetFeedbackSend,
+  useRegularFeedbackSend,
+} from '../../../api/useFeedback2';
 
 export default function FeedbackSend3() {
   const navigate = useNavigate();
   const locationState = useLocation().state;
 
-  const { data: favoriteKeywords } = useFeedbackFavoriteByUser();
+  const { data: favoriteKeywords } = useFeedbackFavoriteByUser(
+    locationState.receiver.id,
+  );
   const { teams, selectedTeam } = useTeam();
   const gptMutation = useFeedbackRefinement();
-  const feedbackMutation = useRegularFeedbackSend();
+  const feedbackMutation =
+    locationState.isRegular ?
+      useRegularFeedbackSend()
+    : useFrequnetFeedbackSend();
 
   const [isAnonymous, toggleAnonymous] = useReducer(
     (prev) => !prev,
@@ -110,13 +118,14 @@ export default function FeedbackSend3() {
           disabled={textLength === 0}
           onClick={() => {
             if (0 < textLength && textLength <= 400) {
-              const { receiver, ...rest } = locationState;
+              const { receiver, isRegular, ...rest } = locationState;
               feedbackMutation.mutate(
                 {
                   ...rest,
                   receiverId: locationState.receiver.id,
                   subjectiveFeedback: textContent,
                   isAnonymous,
+                  teamId: selectedTeam,
                 },
                 { onSuccess: () => navigate('../../complete?type=SEND') },
               );
