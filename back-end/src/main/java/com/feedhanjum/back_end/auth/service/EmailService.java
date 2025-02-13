@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -16,6 +17,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @Service
 public class EmailService {
     private static final String EMAIL_TEMPLATE_NAME = "email";
+    private static final String LOGO_IMAGE_NAME = "static/logo.png";
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
@@ -29,6 +31,10 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject(title);
             helper.setText(renderEmailTemplate(title, type, code, expireMinutes), true);
+            // base64 이미지를 디코딩하여 첨부
+            ClassPathResource logoImageResource = new ClassPathResource(LOGO_IMAGE_NAME);
+            helper.addInline("logo", logoImageResource, "image/png");
+
             mailSender.send(message);
         } catch (MessagingException e) {
             log.error("메일 전송 오류 발생", e);
