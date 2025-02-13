@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class FeedbackReceiveNotificationDto extends InAppNotificationDto {
     @Schema(description = "알림 타입", allowableValues = NotificationType.FEEDBACK_RECEIVE)
     private final String type = NotificationType.FEEDBACK_RECEIVE;
-    @Schema(description = "보낸 사람 이름")
+    @Schema(description = "보낸 사람 이름. 익명 피드백의 경우 '익명'")
     private final String senderName;
     @Schema(description = "팀 이름")
     private final String teamName;

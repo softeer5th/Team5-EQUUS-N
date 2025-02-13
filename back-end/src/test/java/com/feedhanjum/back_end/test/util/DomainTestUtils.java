@@ -1,9 +1,6 @@
 package com.feedhanjum.back_end.test.util;
 
-import com.feedhanjum.back_end.feedback.domain.AssociatedTeam;
-import com.feedhanjum.back_end.feedback.domain.FeedbackType;
-import com.feedhanjum.back_end.feedback.domain.Receiver;
-import com.feedhanjum.back_end.feedback.domain.Sender;
+import com.feedhanjum.back_end.feedback.domain.*;
 import com.feedhanjum.back_end.member.domain.FeedbackPreference;
 import com.feedhanjum.back_end.member.domain.Member;
 import com.feedhanjum.back_end.member.domain.ProfileImage;
@@ -64,6 +61,12 @@ public class DomainTestUtils {
         RegularFeedbackRequest request = new RegularFeedbackRequest(LocalDateTime.of(2022, 1, 1, 0, 0), receiver, sender);
         ReflectionTestUtils.setField(request, "id", nextId.getAndIncrement());
         return request;
+    }
+
+    public static Feedback createFeedbackWithId(Member sender, Member receiver, Team team, FeedbackType feedbackType) {
+        Feedback feedback = new Feedback(feedbackType, FeedbackFeeling.POSITIVE, FeedbackFeeling.POSITIVE.getObjectiveFeedbacks().subList(0, 3), "좋아요", sender, receiver, team);
+        ReflectionTestUtils.setField(feedback, "id", nextId.getAndIncrement());
+        return feedback;
     }
 
 
