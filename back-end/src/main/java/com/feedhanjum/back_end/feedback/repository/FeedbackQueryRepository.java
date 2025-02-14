@@ -88,6 +88,7 @@ public class FeedbackQueryRepository {
         return new PageImpl<>(result, pageable, total);
     }
 
+
     public List<Feedback> findReceivedFeedbacks(Long receiverId) {
         Objects.requireNonNull(receiverId);
 
@@ -98,6 +99,8 @@ public class FeedbackQueryRepository {
     }
 
     public Long findReceivedFeedbackCount(Long receiverId) {
+        Objects.requireNonNull(receiverId);
+
         return queryFactory
                 .select(feedback.count())
                 .from(feedback)
@@ -106,6 +109,8 @@ public class FeedbackQueryRepository {
     }
 
     public Long findSentFeedbackCount(Long senderId) {
+        Objects.requireNonNull(senderId);
+
         return queryFactory
                 .select(feedback.count())
                 .from(feedback)

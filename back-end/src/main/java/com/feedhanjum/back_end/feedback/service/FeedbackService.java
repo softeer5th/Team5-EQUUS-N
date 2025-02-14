@@ -5,9 +5,7 @@ import com.feedhanjum.back_end.feedback.domain.Feedback;
 import com.feedhanjum.back_end.feedback.domain.FeedbackFeeling;
 import com.feedhanjum.back_end.feedback.domain.FeedbackType;
 import com.feedhanjum.back_end.feedback.domain.ObjectiveFeedback;
-import com.feedhanjum.back_end.feedback.event.FeedbackLikedEvent;
-import com.feedhanjum.back_end.feedback.event.FrequentFeedbackCreatedEvent;
-import com.feedhanjum.back_end.feedback.event.RegularFeedbackCreatedEvent;
+import com.feedhanjum.back_end.feedback.event.*;
 import com.feedhanjum.back_end.feedback.exception.NoRegularFeedbackRequestException;
 import com.feedhanjum.back_end.feedback.repository.FeedbackQueryRepository;
 import com.feedhanjum.back_end.feedback.repository.FeedbackRepository;
@@ -34,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -70,6 +69,7 @@ public class FeedbackService {
                 .build();
         feedbackRepository.save(feedback);
         eventPublisher.publishEvent(new FrequentFeedbackCreatedEvent(feedback.getId()));
+        eventPublisher.publishEvent(new FeedbackReceivedEvent(receiverId));
         return feedback;
 
     }
@@ -124,6 +124,7 @@ public class FeedbackService {
         feedbackRepository.save(feedback);
         regularFeedbackRequestRepository.delete(regularFeedbackRequest);
         eventPublisher.publishEvent(new RegularFeedbackCreatedEvent(feedback.getId()));
+        eventPublisher.publishEvent(new FeedbackReceivedEvent(receiverId));
         return feedback;
     }
 
@@ -231,5 +232,18 @@ public class FeedbackService {
     @Transactional(readOnly = true)
     public Long getSentFeedbackCount(Long id) {
         return feedbackQueryRepository.findSentFeedbackCount(id);
+    }
+
+
+    @Transactional(readOnly = true)
+    public void createFeedbackReports(Map<Long, Long> feedbackCreatedCounter) {
+        for (Map.Entry<Long, Long> entry : feedbackCreatedCounter.entrySet()) {
+            Long key = entry.getKey();
+            Long value = entry.getValue();
+            Long count = feedbackQueryRepository.findReceivedFeedbackCount(key);
+            if (count >= 10 && count - value < 10) {
+                eventPublisher.publishEvent(new FeedbackReportCreatedEvent(key, null));
+            }
+        }
     }
 }
