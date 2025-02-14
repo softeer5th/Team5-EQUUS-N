@@ -1,9 +1,10 @@
 import { api } from './baseApi';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { replace, useNavigate } from 'react-router-dom';
 import { showToast } from '../utility/handleToast';
 import { useUser } from '../useUser';
 import { useJoinTeam } from './useTeamspace';
+import { useTeam } from '../useTeam';
 
 const BASE_URL_2 = '/api/auth';
 
@@ -56,6 +57,20 @@ export const useLogin = (teamCode) => {
     },
     onError: (error) => {
       showToast(`로그인 실패: ${error.message}`);
+    },
+  });
+};
+
+export const useLogout = () => {
+  const navigate = useNavigate();
+  const { setTeams } = useTeam();
+  const { setUserId } = useUser();
+  return useMutation({
+    mutationFn: () => api.post({ url: '/api/auth/logout' }),
+    onSuccess: () => {
+      setUserId(null);
+      setTeams([]);
+      navigate('/', { replace: true });
     },
   });
 };

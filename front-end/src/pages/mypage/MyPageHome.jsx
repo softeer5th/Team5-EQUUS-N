@@ -5,11 +5,13 @@ import { useSearchMember } from '../../api/useMyPage';
 import { useUser } from '../../useUser';
 import Icon from '../../components/Icon';
 import { useId } from 'react';
+import { useLogout } from '../../api/useAuth';
 
 export default function MyPageHome() {
   const navigate = useNavigate();
   const { userId } = useUser();
   const { data: member } = useSearchMember(userId);
+  const { mutate: logout } = useLogout();
 
   const listButtontexts = [
     ['피드백 리포트', 'report'],
@@ -17,6 +19,10 @@ export default function MyPageHome() {
     ['피드백 선호도 관리', '/feedback/favorite'],
     ['나의 회고', 'self'],
   ];
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div className='flex size-full flex-col'>
@@ -63,6 +69,13 @@ export default function MyPageHome() {
           />
         ))}
       </ul>
+      <div className='flex-1' />
+      <a
+        className='body-1 mb-[50px] text-center text-gray-400'
+        onClick={() => handleLogout()}
+      >
+        로그아웃
+      </a>
     </div>
   );
 }

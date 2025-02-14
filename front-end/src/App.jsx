@@ -29,6 +29,7 @@ import FeedbackSendStep from './pages/feedback/FeedbackSendStep';
 import FeedbackSend from './pages/feedback/FeedbackSend';
 import FeedbackFavorite from './pages/feedback/FeedbackFavorite';
 import MyPageHome from './pages/mypage/MyPageHome';
+import ProtectedRoute from './ProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -40,45 +41,48 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path='/:teamCode?' element={<Splash />} />
-              <Route path='feedback'>
-                <Route path='request' element={<FeedbackRequest />} />
-                <Route path='send' element={<FeedbackSendLayout />}>
-                  <Route index element={<FeedbackSend />} />
-                  <Route path=':step' element={<FeedbackSendStep />} />
-                </Route>
-                <Route path='self' element={<FeedbackSelf />} />
-                <Route path='complete' element={<FeedbackComplete />} />
-                <Route path='favorite' element={<FeedbackFavorite />} />
-                <Route path='received' element={<FeedbackReceived />} />
-                <Route path='sent' element={<FeedbackSent />} />
-              </Route>
               <Route path='signin' element={<SignIn />} />
               <Route path='signup' element={<SignUp />} />
-              <Route path='teamspace'>
-                <Route path='make'>
-                  <Route index element={<TeamSpaceMake />} />
-                  <Route
-                    path='first'
-                    element={<TeamSpaceMake isFirst={true} />}
-                  />
-                  <Route path='success' element={<TeamSpaceMakeSuccess />} />
+              {/* 이 아래는 로그인 해야 이용 가능 */}
+              <Route element={<ProtectedRoute />}>
+                <Route path='feedback'>
+                  <Route path='request' element={<FeedbackRequest />} />
+                  <Route path='send' element={<FeedbackSendLayout />}>
+                    <Route index element={<FeedbackSend />} />
+                    <Route path=':step' element={<FeedbackSendStep />} />
+                  </Route>
+                  <Route path='self' element={<FeedbackSelf />} />
+                  <Route path='complete' element={<FeedbackComplete />} />
+                  <Route path='favorite' element={<FeedbackFavorite />} />
+                  <Route path='received' element={<FeedbackReceived />} />
+                  <Route path='sent' element={<FeedbackSent />} />
                 </Route>
-                <Route path='list' element={<TeamSpaceList />} />
-                <Route path='manage/:teamId'>
-                  <Route index element={<TeamSpaceManage />} />
-                  <Route path='edit' element={<TeamSpaceEdit />} />
+                <Route path='teamspace'>
+                  <Route path='make'>
+                    <Route index element={<TeamSpaceMake />} />
+                    <Route
+                      path='first'
+                      element={<TeamSpaceMake isFirst={true} />}
+                    />
+                    <Route path='success' element={<TeamSpaceMakeSuccess />} />
+                  </Route>
+                  <Route path='list' element={<TeamSpaceList />} />
+                  <Route path='manage/:teamId'>
+                    <Route index element={<TeamSpaceManage />} />
+                    <Route path='edit' element={<TeamSpaceEdit />} />
+                  </Route>
                 </Route>
-              </Route>
-              <Route path='calendar' element={<Calendar />} />
-              <Route path='main'>
-                <Route index element={<MainPage />} />
-                <Route path='notification' element={<NotificationPage />} />
-              </Route>
-              <Route path='mypage'>
-                <Route index element={<MyPageHome />} />
-                <Route path='self' element={<SelfFeedback />} />
-                <Route path='report' element={<div></div>} />
-                <Route path='edit' element={<div></div>} />
+                <Route path='calendar' element={<Calendar />} />
+                <Route path='main'>
+                  <Route index element={<MainPage />} />
+                  <Route path='notification' element={<NotificationPage />} />
+                </Route>
+                <Route path='mypage'>
+                  <Route index element={<MyPageHome />} />
+                  <Route path='self' element={<SelfFeedback />} />
+                  <Route path='report' element={<div></div>} />
+                  <Route path='edit' element={<div></div>} />
+                </Route>
               </Route>
             </Route>
           </Routes>

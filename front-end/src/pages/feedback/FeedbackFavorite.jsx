@@ -37,7 +37,7 @@ export default function FeedbackFavorite() {
     : mutation.mutate(
         {
           ...location.state,
-          feedbackPreference: [...selectedStyle, ...selectedContent],
+          feedbackPreferences: [...selectedStyle, ...selectedContent],
         },
         {
           onSuccess: (data) => {

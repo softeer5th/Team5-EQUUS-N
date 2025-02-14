@@ -14,7 +14,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import '../../slider.css';
 import { filterNotifications } from '../../utility/handleNotification';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { hideModal, showModal } from '../../utility/handleModal';
 import Modal, { ModalType } from '../../components/modals/Modal';
 import ProfileImage from '../../components/ProfileImage';
@@ -27,8 +27,10 @@ import { getScheduleTimeDiff } from '../../utility/time';
 import { useTeam } from '../../useTeam';
 import useScheduleAction from '../calendar/hooks/useScheduleAction';
 import { useUser } from '../../useUser';
+import useBlockPop from '../../useBlockPop';
 
 export default function MainPage() {
+  const location = useLocation();
   const [banners, setBanners] = useState();
   const [timeDiff, setTimeDiff] = useState();
   const [isTodoAddOpen, toggleTodoAdd] = useReducer((prev) => !prev, false);
@@ -48,6 +50,8 @@ export default function MainPage() {
   const navigate = useNavigate();
 
   // TODO: 로딩 중 혹은 에러 발생 시 처리
+
+  useBlockPop(location.pathname);
 
   useEffect(() => {
     clearData();

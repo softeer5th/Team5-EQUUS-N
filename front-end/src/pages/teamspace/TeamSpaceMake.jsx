@@ -4,7 +4,7 @@ import NavBar from '../auth/components/NavBar';
 import NavBar2 from '../../components/NavBar2';
 import Icon from '../../components/Icon';
 import LargeButton from '../../components/buttons/LargeButton';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { showToast } from '../../utility/handleToast';
 import { checkTeamSpaceMakingInfo } from '../../utility/inputChecker';
@@ -13,6 +13,7 @@ import CustomDatePicker, {
 } from '../../components/CustomDatePicker';
 import { useMakeTeam } from '../../api/useTeamspace';
 import { useTeam } from '../../useTeam';
+import useBlockPop from '../../useBlockPop';
 
 /**
  * @param {object} props
@@ -20,6 +21,7 @@ import { useTeam } from '../../useTeam';
  * @returns
  */
 export default function TeamSpaceMake({ isFirst = false }) {
+  const location = useLocation();
   const [teamSpaceName, setTeamSpaceName] = useState('');
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -29,6 +31,10 @@ export default function TeamSpaceMake({ isFirst = false }) {
   const navigate = useNavigate();
   const { mutate: makeTeam } = useMakeTeam();
   const { selectTeam } = useTeam();
+
+  if (location.pathname === '/teamspace/make/first') {
+    useBlockPop(location.pathname);
+  }
 
   const onClickNext = () => {
     if (!checkTeamSpaceMakingInfo(teamSpaceName, startDate, endDate)) {
